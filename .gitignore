@@ -100,3 +100,10 @@ ENV/
 # mypy
 .mypy_cache/
 .idea/
+*.sift
+*.q1
+*.q2
+*.q3
+*.q4
+result.txt
+distortion.txt
