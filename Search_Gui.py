@@ -57,7 +57,7 @@ class Example(Frame):
 
  
 def openFile ():
-    fileName = tkFileDialog.askopenfilename(initialdir = "./dataset")
+    fileName = tkFileDialog.askopenfilename(filetypes=[("Image Files","*.jpg;*.gif")], initialdir = "./dataset")
     app.fileName.set(fileName)
 
 def startSearching (fileName, mode, images):
@@ -81,10 +81,9 @@ def startSearching (fileName, mode, images):
 
 if __name__ == '__main__':
     root = Tk()
-    size = 220, 220
 
     app = Example(root)
-    root.geometry("1024x720")
+    root.geometry("1280x720")
     root.mainloop()
 
   

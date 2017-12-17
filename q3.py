@@ -55,7 +55,7 @@ def countFreq(arr):
     freq = [0]*K_COUNT
     for ele in arr:
         freq[ele] += 1
-    return np.argsort(freq)[-10:]
+    return np.argsort(freq)[-int(K_COUNT/20):]
 
 
 def kMeans():
