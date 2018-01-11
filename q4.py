@@ -16,7 +16,7 @@ def run(fileName):
     for x in xrange(FILE_COUNT):
         with open(convertToPathStr(x) + ".q4") as f:
             compareFeatureList = map(int, f.read().split(' '))
-            for i in xrange(100):
+            for i in xrange(K_COUNT):
                 compareDistance[x] += pow((featureList[i] - compareFeatureList[i]), 2)
 
     #print "compareDistance: ", compareDistance
