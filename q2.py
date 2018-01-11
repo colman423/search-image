@@ -2,7 +2,7 @@
 # coding=utf-8
 import numpy as np
 from PIL import Image
-import scipy.fftpack
+import scipy.fftpack as fft
 from utility import *
 
 
@@ -11,31 +11,35 @@ def run(fileName):
 
     fileName += ".q2"
     compareDistance = [-1] * FILE_COUNT
-    yArr, cbArr, crArr = [], [], []
 
     with open(fileName) as f:
-        # fileHistogramList = map(int, f.read().splitlines())
-        fileHistogramList = f.read().splitlines()
-        for item in fileHistogramList:
-            y, cb, cr = item.split(' ')
-            yArr.append(float(y))
-            cbArr.append(float(cb))
-            crArr.append(float(cr))
+        fileData = [item.split(' ') for item in f.read().splitlines()]
+        f.close()
+        yArr = [float(j[0]) for j in fileData]
+        cbArr = [float(j[1]) for j in fileData]
+        crArr = [float(j[2]) for j in fileData]
 
-        # fileHistogram = np.array(fileHistogramList)
-        # print fileHistogram
 
     for x in xrange(FILE_COUNT):
         with open(convertToPathStr(x) + ".q2") as f:
-            compareFileHistogramList = f.read().splitlines()
-            compareYArr, compareCbArr, compareCrArr = [], [], []
-            for item in compareFileHistogramList:
-                y, cb, cr = item.split(' ')
-                compareYArr.append(float(y))
-                compareCbArr.append(float(cb))
-                compareCrArr.append(float(cr))
 
-            compareDistance[x] = np.linalg.norm(np.array(yArr) - np.array(compareYArr))+np.linalg.norm(np.array(cbArr) - np.array(compareCbArr))+np.linalg.norm(np.array(crArr) - np.array(compareCrArr))
+
+            print "comparing file "+convertToPathStr(x) + ".q2"
+            compareData = [item.split(' ') for item in f.read().splitlines()]
+            f.close()
+            compY = [float(j[0]) for j in compareData]
+            compCb = [float(j[1]) for j in compareData]
+            compCr = [float(j[2]) for j in compareData]
+
+
+            disY, disCb, disCr = 0, 0, 0
+            for k in xrange(64):
+                disY += pow(yArr[k] - compY[k], 2)
+                disCb += pow(cbArr[k] - compCb[k], 2)
+                disCr += pow(crArr[k] - compCr[k], 2)
+
+            compareDistance[x] = pow(disY, 0.5) + pow(disCb, 0.5) + pow(disCr, 0.5)
+
 
     #print "compareDistance: ", compareDistance
     sortArr =  np.argsort(compareDistance)[:10]
@@ -44,108 +48,97 @@ def run(fileName):
 
 
 def convertZigzac(arr):
-    newArr = []
-    newArr.append(arr[0])
-    newArr.append(arr[1])
-    newArr.append(arr[8])
-    newArr.append(arr[16])
-    newArr.append(arr[9])
-    newArr.append(arr[2])
-    newArr.append(arr[3])
-    newArr.append(arr[10])
-    newArr.append(arr[17])
-    newArr.append(arr[24])
-    newArr.append(arr[32])
-    newArr.append(arr[25])
-    newArr.append(arr[18])
-    newArr.append(arr[11])
-    newArr.append(arr[4])
-    newArr.append(arr[5])
-    newArr.append(arr[12])
-    newArr.append(arr[19])
-    newArr.append(arr[26])
-    newArr.append(arr[33])
-    newArr.append(arr[40])
-    newArr.append(arr[48])
-    newArr.append(arr[41])
-    newArr.append(arr[34])
-    newArr.append(arr[27])
-    newArr.append(arr[20])
-    newArr.append(arr[13])
-    newArr.append(arr[6])
-    newArr.append(arr[7])
-    newArr.append(arr[14])
-    newArr.append(arr[21])
-    newArr.append(arr[28])
-    newArr.append(arr[35])
-    newArr.append(arr[42])
-    newArr.append(arr[49])
-    newArr.append(arr[56])
-    newArr.append(arr[57])
-    newArr.append(arr[50])
-    newArr.append(arr[43])
-    newArr.append(arr[36])
-    newArr.append(arr[29])
-    newArr.append(arr[22])
-    newArr.append(arr[15])
-    newArr.append(arr[23])
-    newArr.append(arr[30])
-    newArr.append(arr[37])
-    newArr.append(arr[44])
-    newArr.append(arr[51])
-    newArr.append(arr[58])
-    newArr.append(arr[59])
-    newArr.append(arr[52])
-    newArr.append(arr[45])
-    newArr.append(arr[38])
-    newArr.append(arr[31])
-    newArr.append(arr[39])
-    newArr.append(arr[46])
-    newArr.append(arr[53])
-    newArr.append(arr[60])
-    newArr.append(arr[61])
-    newArr.append(arr[54])
-    newArr.append(arr[47])
-    newArr.append(arr[55])
-    newArr.append(arr[62])
-    newArr.append(arr[63])
-    return newArr
+    convert = [[0, 1, 5, 6, 14, 15, 27, 28],
+            [2, 4, 7, 13, 16, 26, 29, 42],
+            [3, 8, 12, 17, 25, 30, 41, 43],
+            [9, 11, 18, 24, 31, 40, 44, 53],
+            [10, 19, 23, 32, 39, 45, 52, 54],
+            [20, 22, 33, 38, 46, 51, 55, 60],
+            [21, 34, 37, 47, 50, 56, 59, 61],
+            [35, 36, 48, 49, 57, 58, 62, 63]]
+    data=[None]*64
+    for i in xrange(8):
+        for j in xrange(8):
+            data[convert[i][j]] = arr[i][j]
+    # print "convertEnd"
+    # print data
+    return data
+
+def _ycc(r, g, b): # in (0,255) range
+    y = .299*r + .587*g + .114*b
+    cb = 128 -.168736*r -.331364*g + .5*b
+    cr = 128 +.5*r - .418688*g - .081312*b
+    return y, cb, cr
+
+def getSide(x, y):
+    if x==7:
+        return getSide(6, y)
+    elif y==7:
+        return getSide(x, 6)
+    else:
+        return x, y
+
+
+def doColorLayout(pixel, width, height, xStart=0, yStart=0):
+    # print "start doing color layout!, x, y start = ", xStart, yStart
+    blockW, blockH = width/8, height/8
+    representY = [[0 for i in range(8)] for j in range(8)]
+    representCb = [[0 for i in range(8)] for j in range(8)]
+    representCr = [[0 for i in range(8)] for j in range(8)]
+    for xBlock in xrange(8):
+        for yBlock in xrange(8):
+            xBase = blockW*xBlock+xStart
+            yBase = blockH*yBlock+yStart
+            # print "block: ", xBlock, yBlock, "Base: ", xBase, yBase
+
+            pixArr = []
+            for x in xrange(blockW):
+                for y in xrange(blockH):
+                    try:
+                        pixArr.append(pixel[x+xBase, y+yBase])
+                    except:
+                        pass
+
+            # pixArr = [ pixel[x+xBase, y+yBase] for x in xrange(blockW) for y in xrange(blockH)]
+            if len(pixArr)!=0:
+                colR = sum([col[0] for col in pixArr]) / float(len(pixArr))
+                colG = sum([col[1] for col in pixArr]) / float(len(pixArr))
+                colB = sum([col[2] for col in pixArr]) / float(len(pixArr))
+                # print "RGB:", colR, colG, colB
+
+                colY, colCb, colCr = _ycc(colR, colG, colB)
+                representY[xBlock][yBlock] = colY
+                representCb[xBlock][yBlock] = colCb
+                representCr[xBlock][yBlock] = colCr
+            else:
+                x, y = getSide(xBlock, yBlock)
+                representY[xBlock][yBlock] = representY[x][y]
+                representCb[xBlock][yBlock] = representCb[x][y]
+                representCr[xBlock][yBlock] = representCr[x][y]
+
+    # print "block success"
+
+    dctY = fft.dct(representY)
+    dctCb = fft.dct(representCb)
+    dctCr = fft.dct(representCr)
+    return convertZigzac(dctY), convertZigzac(dctCb), convertZigzac(dctCr)
 
 def offlineProcess(i):
 
     fileName = convertToPathStr(i)
     # fileName = "E:/Porkchop/PycharmProjects/MM_HW03/dataset/ukbench00001.jpg"
     print fileName
-    img = Image.open(fileName).convert('YCbCr')
+    img = Image.open(fileName)
     pixel = img.load()
     width, height = img.size
-    blockW, blockH = width/8, height/8
+    dataY, dataCb, dataCr = doColorLayout(pixel, width, height)
 
-    mosaicArr = []
-    for yCount in xrange(8):
-        for xCount in xrange(8):
-            colArr = []
-            countArr = []
-            left, right = blockW*xCount, blockW*(xCount+1)
-            top, bottom = blockH*yCount, blockH*(yCount+1)
-            for x in range(left, right, 1):
-                for y in range(top, bottom, 1):
-                    tmp = pixel[x, y]
-                    colArr.append(tmp)
-                    countArr.append(tmp[0]+tmp[1]+tmp[2])
-
-            median = len(countArr)/2
-            colIndex = np.argsort(countArr)[median]
-            mosaicArr.append(colArr[colIndex])
-
-    dctResult = scipy.fftpack.dct(mosaicArr)
-    dctResult = convertZigzac(dctResult)
-    # print dctResult
-
-    text = open(fileName+".q2", "w")
-    for item in dctResult:
-        print>>text, ' '.join(str(e) for e in item)
+    text = open(fileName + ".q2", "w")
+    for i in xrange(64):
+        print>> text, str(dataY[i]) + ' ' + str(dataCb[i]) + ' ' + str(dataCr[i])
     text.close()
+
+
 
 if __name__ == "__main__":
     for x in range(0, FILE_COUNT):

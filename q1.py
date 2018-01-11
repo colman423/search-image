@@ -34,55 +34,28 @@ def run(fileName):
 
 
 def offlineProcess(i):
-    #colorsys.rgb_to_hsv(R, G, B)
 
     fileName = convertToPathStr(i)
-    # fileName = "E:/Porkchop/PycharmProjects/MM_HW03/dataset/ukbench00220.jpg"
-    # fileName = "C:/Users/Stanley/Documents/search-image/dataset/ukbench00220.jpg"
     print fileName
+
     img = Image.open(fileName)
     pixel = img.load()
-    #rArr = [0]*256
-    #gArr = [0]*256
-    #bArr = [0]*256
     hArr = [0]*360
     sArr = [0]*101
     vArr = [0]*101
-    Arr = []
-    Hsv = []
     width, height = img.size
-    # print img.size
-    # print pixel
 
-    for x in xrange(width):
-        for y in xrange(height):
-            color = pixel[x, y]
-            # print x, y, color
-            #rArr[color[0]] += 1
-            #gArr[color[1]] += 1
-            #bArr[color[2]] += 1
-            Arr.append(color)
+    Arr = [pixel[x, y] for x in xrange(width) for y in xrange(height)]
+    Hsv = [colorsys.rgb_to_hsv(item[0]/255., item[1]/255., item[2]/255.) for item in Arr]
 
-    for x in xrange(len(Arr)):
-        Hsv.append(colorsys.rgb_to_hsv(Arr[x][0]/255., Arr[x][1]/255., Arr[x][2]/255.))
     for x in xrange(len(Hsv)):
         Hsv[x] = (Hsv[x][0]*360, Hsv[x][1]*100, Hsv[x][2]*100)
-        Hadjust = 0
-        if int(round(Hsv[x][0])) != 360:
-            Hadjust = int(round(Hsv[x][0]))
+        Hadjust = int(round(Hsv[x][0]))
+        if Hadjust==360:
+            Hadjust = 0
         hArr[Hadjust] += 1
         sArr[int(round(Hsv[x][1]))] += 1
         vArr[int(round(Hsv[x][2]))] += 1
-
-    # print rArr+gArr+bArr
-    # print rArr
-    # print gArr
-    # print bArr
-    #text = open(fileName+".q1", "w")
-    #for i in rArr+gArr+bArr:
-    #    print>>text, i
-    # text.write("{}".format(rArr+gArr+bArr))
-    #text.close()
 
     hsv = open(fileName+".q1hsv", "w")
     for i in hArr+sArr+vArr:
