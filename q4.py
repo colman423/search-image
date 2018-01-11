@@ -19,7 +19,7 @@ def run(fileName):
             for i in xrange(100):
                 compareDistance[x] += pow((featureList[i] - compareFeatureList[i]), 2)
 
-    print "compareDistance: ", compareDistance
+    #print "compareDistance: ", compareDistance
     sortArr = np.argsort(compareDistance)[:10]
     print sortArr
     return [convertToPathStr(ele) for ele in sortArr]

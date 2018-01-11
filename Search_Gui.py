@@ -72,7 +72,7 @@ def startSearching (fileName, mode, images):
     else:
         print mode+", mode not found"
         return
-    print ans
+    #print ans
 
     for x in xrange(len(images)):
         filename = ImageTk.PhotoImage(Image.open(ans[x]))

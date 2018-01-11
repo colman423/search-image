@@ -37,7 +37,7 @@ def run(fileName):
 
             compareDistance[x] = np.linalg.norm(np.array(yArr) - np.array(compareYArr))+np.linalg.norm(np.array(cbArr) - np.array(compareCbArr))+np.linalg.norm(np.array(crArr) - np.array(compareCrArr))
 
-    print "compareDistance: ", compareDistance
+    #print "compareDistance: ", compareDistance
     sortArr =  np.argsort(compareDistance)[:10]
     print sortArr
     return [convertToPathStr(ele) for ele in sortArr]

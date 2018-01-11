@@ -102,6 +102,7 @@ ENV/
 .idea/
 *.sift
 *.q1
+*.q1hsv
 *.q2
 *.q3
 *.q4
