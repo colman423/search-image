@@ -24,7 +24,7 @@ def run(fileName):
         with open(convertToPathStr(x) + ".q2") as f:
 
 
-            print "comparing file "+convertToPathStr(x) + ".q2"
+            #print "comparing file "+convertToPathStr(x) + ".q2"
             compareData = [item.split(' ') for item in f.read().splitlines()]
             f.close()
             compY = [float(j[0]) for j in compareData]
